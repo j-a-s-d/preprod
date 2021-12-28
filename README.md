@@ -44,6 +44,17 @@ a custom old-school preprocessor for nim
 * DEF command: adds a conditional define
 * UNDEF command: deletes a conditional define
 
+## AVAILABLE OPTIONS
+
+*allowLeftWhitespace*: enables/disables the acceptance of whitespace before a command (true by default)
+*linePrefix*: customizes the line prefix (".$" by default)
+*initialCommentPrefix*: sets the initial comment prefix ("#" by default)
+*initialEnabledFeatures*: customizes the initial enabled features (all by default)
+*initialConditionalDefines*: sets the initial conditional defines (none by default)
+*customPrefix*: sets the prefix for custom commands ("." by default)
+*keepBlankLines*: establishes if produced blank lines are kept in the output (true by default)
+*initialLineAppendix*: sets the initial line appendix (EOL by default)
+
 ## USAGE
 
 ```nim
