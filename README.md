@@ -47,12 +47,19 @@ a custom old-school preprocessor for nim
 ## AVAILABLE OPTIONS
 
 *allowLeftWhitespace*: enables/disables the acceptance of whitespace before a command (true by default)
+
 *linePrefix*: customizes the line prefix (".$" by default)
+
 *initialCommentPrefix*: sets the initial comment prefix ("#" by default)
+
 *initialEnabledFeatures*: customizes the initial enabled features (all by default)
+
 *initialConditionalDefines*: sets the initial conditional defines (none by default)
+
 *customPrefix*: sets the prefix for custom commands ("." by default)
+
 *keepBlankLines*: establishes if produced blank lines are kept in the output (true by default)
+
 *initialLineAppendix*: sets the initial line appendix (EOL by default)
 
 ## USAGE
@@ -83,6 +90,9 @@ You may also want to check my other nimlang projects:
 
 ## HISTORY
 
+* 08-02-22 *[1.0.1]*
+	- added hasConditionalDefine, addConditionalDefine, removeConditionalDefine to exports
+	- updated xam dependency to 1.7.0
 * 28-12-21 *[1.0.0]*
 	- first public release
 * 08-12-21 *[0.0.1]*

@@ -1,9 +1,9 @@
-version     = "1.0.0"
+version     = "1.0.1"
 author      = "Javier Santo Domingo"
 description = "preprod"
 license     = "MIT"
 srcDir      = "src"
 
 requires "nim >= 1.0.6"
-requires "xam >= 1.6.0"
+requires "xam >= 1.7.0"
 

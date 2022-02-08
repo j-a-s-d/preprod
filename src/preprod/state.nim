@@ -8,7 +8,7 @@ import
 
 use(strutils,split)
 
-func backupProperties*(state: var PreprodState): StringTableRef =
+func backupProperties*(state: PreprodState): StringTableRef =
   result = newStringTable()
   for k, v in state.properties:
     result[k] = v
@@ -50,7 +50,7 @@ func addConditionalDefine*(state: var PreprodState, define: string) =
 func removeConditionalDefine*(state: var PreprodState, define: string) =
   state.defines.remove(define)
 
-func hasConditionalDefine*(state: var PreprodState, define: string): bool =
+func hasConditionalDefine*(state: PreprodState, define: string): bool =
   state.defines.find(define) > -1
 
 func mergeInclusionsIntoContent*(state: var PreprodState) =
@@ -60,7 +60,7 @@ func mergeInclusionsIntoContent*(state: var PreprodState) =
   state.inclusions.clear()
   state.setContent(tmp)
 
-func hasInclusionsToMerge*(state: var PreprodState): bool =
+func hasInclusionsToMerge*(state: PreprodState): bool =
   state.inclusions.len > 0
 
 func scheduleForInclusion*(state: var PreprodState, lines: PreprodLines) =
@@ -69,13 +69,13 @@ func scheduleForInclusion*(state: var PreprodState, lines: PreprodLines) =
 func removePropertyValue*(state: var PreprodState, key: string) =
   state.properties.del(key)
 
-func getPropertyValue*(state: var PreprodState, key: string): string =
+func getPropertyValue*(state: PreprodState, key: string): string =
   state.properties[key]
 
 func setPropertyValue*(state: var PreprodState, key: string, value: string) =
   state.properties[key] = value
 
-func hasPropertyValue*(state: var PreprodState, key: string): bool =
+func hasPropertyValue*(state: PreprodState, key: string): bool =
   state.properties.hasKey(key)
 
 func appendPropertyValueAsSequence*(state: var PreprodState, key: string, value: string) =
@@ -85,10 +85,10 @@ func appendPropertyValueAsSequence*(state: var PreprodState, key: string, value:
     value
   )
 
-func retrievePropertyValueAsSequence*(state: var PreprodState, key: string): StringSeq =
+func retrievePropertyValueAsSequence*(state: PreprodState, key: string): StringSeq =
   state.getPropertyValue(key).split(STRINGS_EOL)
 
-func isFeatureEnabled*(state: var PreprodState, name: string): bool =
+func isFeatureEnabled*(state: PreprodState, name: string): bool =
   state.features.each uf:
     if uf.name == name:
       return uf.enabled
@@ -99,7 +99,7 @@ func enableFeature*(state: var PreprodState, name: string, value: bool) =
       uf.enabled = value
       break
 
-func hasFeature*(state: var PreprodState, name: string): bool =
+func hasFeature*(state: PreprodState, name: string): bool =
   result = false
   state.features.each uf:
     if uf.name == name:
@@ -124,7 +124,7 @@ func leaveBranch*(state: var PreprodState) =
   if state.branches.len > 0:
     discard state.branches.pop()
 
-func inBranch*(state: var PreprodState): bool =
+func inBranch*(state: PreprodState): bool =
   state.branches.len > 0
 
 func isBranchProcessing*(state: var PreprodState): bool =
@@ -136,10 +136,10 @@ func getLastBranchLocation*(state: var PreprodState): string =
 func isCurrentlyProcessable*(state: var PreprodState): bool =
   not (state.inBranch() and not state.isBranchProcessing())
 
-func isPreviewing*(state: var PreprodState): bool =
+func isPreviewing*(state: PreprodState): bool =
   state.phase == upPreviewContent
 
-func isTranslating*(state: var PreprodState): bool =
+func isTranslating*(state: PreprodState): bool =
   state.phase == upTranslateContent
 
 func setupPreprodState*(): PreprodState =
