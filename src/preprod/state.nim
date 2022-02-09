@@ -6,7 +6,7 @@ import
   xam,
   header, lines
 
-use(strutils,split)
+use strutils,split
 
 func backupProperties*(state: PreprodState): StringTableRef =
   result = newStringTable()
@@ -142,8 +142,9 @@ func isPreviewing*(state: PreprodState): bool =
 func isTranslating*(state: PreprodState): bool =
   state.phase == upTranslateContent
 
-func setupPreprodState*(): PreprodState =
+func setupPreprodState*(defines: StringSeq = @[]): PreprodState =
   result.phase = upInvalid
   result.executions = 0
   result.properties = newStringTable()
+  result.defines = defines
   result.tag = nil

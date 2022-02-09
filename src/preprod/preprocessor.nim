@@ -46,7 +46,7 @@ proc loopPhases(ppp: PreprodPreprocessor): PreprodResult =
       let r = if ppp.state.phase == upPreviewContent:
         ppp.previewer(ppp.state, z)
       elif ppp.state.phase == upTranslateContent:
-        ppp.translater(ppp.state, z)
+        ppp.translator(ppp.state, z)
       else:
         z # upProcessDeferred
       if not r.ok:
@@ -83,24 +83,24 @@ proc run*(ppp: PreprodPreprocessor): PreprodResult =
       ppp.state.addConditionalDefine(define)
     return ppp.loopPhases()
 
-proc newPreprodPreprocessor*(input: seq[string], options: PreprodOptions = PREPROD_DEFAULT_OPTIONS, custom: PreprodCommands = @[], translater: PreprodTranslater = DEFAULT_TRANSLATER, previewer: PreprodPreviewer = DEFAULT_PREVIEWER): PreprodPreprocessor =
+proc newPreprodPreprocessor*(input: StringSeq, defines: StringSeq = @[], options: PreprodOptions = PREPROD_DEFAULT_OPTIONS, custom: PreprodCommands = @[], translator: PreprodTranslator = DEFAULT_Translator, previewer: PreprodPreviewer = DEFAULT_PREVIEWER): PreprodPreprocessor =
   result = new PreprodPreprocessor
   result.inline = true
   result.input = input
   result.custom = custom
   result.commands = setupPreprodCommands()
-  result.translater = translater
+  result.translator = translator
   result.previewer = previewer
   result.options = options
-  result.state = setupPreprodState()
+  result.state = setupPreprodState(defines)
 
-proc newPreprodPreprocessor*(input: string, options: PreprodOptions = PREPROD_DEFAULT_OPTIONS, custom: PreprodCommands = @[], translater: PreprodTranslater = DEFAULT_TRANSLATER, previewer: PreprodPreviewer = DEFAULT_PREVIEWER): PreprodPreprocessor =
+proc newPreprodPreprocessor*(input: string, defines: StringSeq = @[], options: PreprodOptions = PREPROD_DEFAULT_OPTIONS, custom: PreprodCommands = @[], translator: PreprodTranslator = DEFAULT_Translator, previewer: PreprodPreviewer = DEFAULT_PREVIEWER): PreprodPreprocessor =
   result = new PreprodPreprocessor
   result.inline = false
   result.input = newStringSeq(input)
   result.custom = custom
   result.commands = setupPreprodCommands()
-  result.translater = translater
+  result.translator = translator
   result.previewer = previewer
   result.options = options
-  result.state = setupPreprodState()
+  result.state = setupPreprodState(defines)

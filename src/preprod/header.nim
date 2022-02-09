@@ -192,13 +192,13 @@ type
 let
   DEFAULT_PREVIEWER*: PreprodPreviewer = proc (state: var PreprodState, r: PreprodResult): PreprodResult = r
 
-# TRANSLATER
+# TRANSLATOR
 
 type
-  PreprodTranslater* = DoubleArgsProc[var PreprodState, PreprodResult, PreprodResult]
+  PreprodTranslator* = DoubleArgsProc[var PreprodState, PreprodResult, PreprodResult]
 
 let
-  DEFAULT_TRANSLATER*: PreprodTranslater = proc (state: var PreprodState, r: PreprodResult): PreprodResult = r
+  DEFAULT_TRANSLATOR*: PreprodTranslator = proc (state: var PreprodState, r: PreprodResult): PreprodResult = r
 
 # PREPROCESSOR
 
@@ -211,7 +211,7 @@ type
     custom*: PreprodCommands
     commands*: PreprodCommands
     # callbacks
-    translater*: PreprodTranslater
+    translator*: PreprodTranslator
     previewer*: PreprodPreviewer
     # options and state
     options*: PreprodOptions

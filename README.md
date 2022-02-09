@@ -90,6 +90,9 @@ You may also want to check my other nimlang projects:
 
 ## HISTORY
 
+* 09-02-22 *[1.0.2]*
+	- added registerFeature, hasFeature, enableFeature and isFeatureEnabled to exports
+	- added constructors overloads
 * 08-02-22 *[1.0.1]*
 	- added hasConditionalDefine, addConditionalDefine, removeConditionalDefine to exports
 	- updated xam dependency to 1.7.0
