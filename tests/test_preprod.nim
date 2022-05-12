@@ -225,14 +225,14 @@ suite "test preprod":
     #
     var opt = PREPROD_DEFAULT_OPTIONS
     opt.keepBlankLines = false
-    let pr0 = newPreprodPreprocessor(BRANCHES2, opt)
+    let pr0 = newPreprodPreprocessor(BRANCHES2, options = opt)
     let rr0 = pr0.run()
     check(pr0.state.executions == 16)
     check(rr0.ok)
     check(rr0.output == "x!" & STRINGS_EOL & "no x!" & STRINGS_EOL)
     #
     opt.initialLineAppendix = "~~"
-    let pr1 = newPreprodPreprocessor(BRANCHES2, opt)
+    let pr1 = newPreprodPreprocessor(BRANCHES2, options = opt)
     let rr1 = pr1.run()
     check(pr1.state.executions == 16)
     check(rr1.ok)
@@ -242,43 +242,43 @@ suite "test preprod":
     var opt = PREPROD_DEFAULT_OPTIONS
     #
     opt.initialConditionalDefines = @["x"]
-    let p = newPreprodPreprocessor(BRANCHES1, opt)
+    let p = newPreprodPreprocessor(BRANCHES1, options = opt)
     let r = p.run()
     check(p.state.executions == 6)
     check(r.ok)
     check(r.output.strip() == "x!")
     #
     opt.allowLeftWhitespace = false
-    let pr = newPreprodPreprocessor(@["        .$ NOOP # this line is not recognized as a valid preprocessor line"], opt)
+    let pr = newPreprodPreprocessor(@["        .$ NOOP # this line is not recognized as a valid preprocessor line"], options = opt)
     let rr = pr.run()
     check(pr.state.executions == 0)
     check(rr.ok)
     check(rr.output == "        .$ NOOP # this line is not recognized as a valid preprocessor line" & STRINGS_EOL)
     #
     opt.initialCommentPrefix = "!"
-    let pr0 = newPreprodPreprocessor(@[".$ ! blah blah blah"], opt)
+    let pr0 = newPreprodPreprocessor(@[".$ ! blah blah blah"], options = opt)
     let rr0 = pr0.run()
     check(pr0.state.executions == 0)
     check(rr0.ok)
     check(rr0.output == STRINGS_EOL)
     #
     opt.linePrefix = "~|~"
-    let pr1 = newPreprodPreprocessor(@["~|~ NOOP"], opt)
+    let pr1 = newPreprodPreprocessor(@["~|~ NOOP"], options = opt)
     let rr1 = pr1.run()
     check(pr1.state.executions == 2)
     check(rr1.ok)
     check(rr1.output == STRINGS_EOL)
     #
     opt.customPrefix = "_"
-    let pr2 = newPreprodPreprocessor(@["_unknownCustomCommand"], opt)
+    let pr2 = newPreprodPreprocessor(@["_unknownCustomCommand"], options = opt)
     let rr2 = pr2.run()
     check(pr2.state.executions == 0)
     check(not rr2.ok)
     check(rr2.output == "(<inline>:1) command 'unknownCustomCommand' is unknown")
     #
     opt.initialEnabledFeatures.remove("COMMENTS")
-    let pr3 = newPreprodPreprocessor(@["~|~ COMMENT CHAR %"], opt)
+    let pr3 = newPreprodPreprocessor(@["~|~ COMMENT CHAR %"], options = opt)
     let rr3 = pr3.run()
     check(pr3.state.executions == 0)
     check(not rr3.ok)
-    check(rr3.output == "(<inline>:1) command 'COMMENT' belongs to the feature 'COMMENTS' which is not enabled")
+    check(rr3.output == "(<inline>:1) command 'COMMENT' belongs to a disabled feature")

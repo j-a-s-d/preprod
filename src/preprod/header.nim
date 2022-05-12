@@ -5,6 +5,8 @@ import
   strtabs,
   xam
 
+use strutils,replace
+
 # LINES
 
 type
@@ -79,6 +81,73 @@ type
     upProcessDeferred = 4
     upProcessed = 5
 
+# ERRORS
+
+type
+  PreprodError* {.pure.} = enum
+    peUnknownError = 0
+    peUnclosedBranch = 1
+    peInexistentFile = 2
+    peInexistentInclude = 3
+    peUnexpectedCommand = 4
+    peNoPrefix = 5
+    pePrefixLength = 6
+    peUndeferrableCommand = 7
+    peMandatoryStandard = 8
+    peBooleanOnly = 9
+    peUnknownFeature = 10
+    peArgumentsCount = 11
+    peNoArguments = 12
+    peDisabledCommand = 13
+    peUnknownCommand = 14
+
+const
+  PREPROD_ARGUMENT* = "$1" # compatible with Rodster format on purpose
+
+let
+  PREPROD_ERROR_FORMATS* = (
+    UNKNOWN_ERROR: PREPROD_ARGUMENT,
+    UNCLOSED_BRANCH: "this branch was not closed",
+    INEXISTENT_FILE: "the file '" & PREPROD_ARGUMENT & "' does not exist",
+    INEXISTENT_INCLUDE: "the included file '" & PREPROD_ARGUMENT & "' does not exist",
+    UNEXPECTED_COMMAND: "unexpected '" & PREPROD_ARGUMENT & "' command",
+    NO_PREFIX: "no comment prefix supplied",
+    PREFIX_LENGTH: "the comment prefix must be only one character long",
+    UNDEFERRABLE_COMMAND: "can not defer a '" & PREPROD_ARGUMENT & "' command",
+    MANDATORY_STANDARD: "the STANDARD feature commands can not be disabled",
+    BOOLEAN_ONLY: "only on/off values are valid",
+    UNKNOWN_FEATURE: "feature '" & PREPROD_ARGUMENT & "' is unknown",
+    ARGUMENTS_COUNT: "arguments expected: " & PREPROD_ARGUMENT,
+    NO_ARGUMENTS: "no arguments supplied",
+    DISABLED_COMMAND: "command '" & PREPROD_ARGUMENT & "' belongs to a disabled feature",
+    UNKNOWN_COMMAND: "command '" & PREPROD_ARGUMENT & "' is unknown"
+  )
+
+# FORMATTER
+
+type
+  PreprodFormatter* = DoubleArgsProc[PreprodError, string, string]
+
+let
+  DEFAULT_FORMATTER*: PreprodFormatter = proc (code: PreprodError, argument: string = STRINGS_EMPTY): string =
+    template replacePreprodArgument(error: string): string = error.replace(PREPROD_ARGUMENT, argument)
+    replacePreprodArgument case code:
+      of peUnknownError: PREPROD_ERROR_FORMATS.UNKNOWN_ERROR
+      of peUnclosedBranch: PREPROD_ERROR_FORMATS.UNCLOSED_BRANCH
+      of peInexistentFile: PREPROD_ERROR_FORMATS.INEXISTENT_FILE
+      of peInexistentInclude: PREPROD_ERROR_FORMATS.INEXISTENT_INCLUDE
+      of peUnexpectedCommand: PREPROD_ERROR_FORMATS.UNEXPECTED_COMMAND
+      of peNoPrefix: PREPROD_ERROR_FORMATS.NO_PREFIX
+      of pePrefixLength: PREPROD_ERROR_FORMATS.PREFIX_LENGTH
+      of peUndeferrableCommand: PREPROD_ERROR_FORMATS.UNDEFERRABLE_COMMAND
+      of peMandatoryStandard: PREPROD_ERROR_FORMATS.MANDATORY_STANDARD
+      of peBooleanOnly: PREPROD_ERROR_FORMATS.BOOLEAN_ONLY
+      of peUnknownFeature: PREPROD_ERROR_FORMATS.UNKNOWN_FEATURE
+      of peArgumentsCount: PREPROD_ERROR_FORMATS.ARGUMENTS_COUNT
+      of peNoArguments: PREPROD_ERROR_FORMATS.NO_ARGUMENTS
+      of peDisabledCommand: PREPROD_ERROR_FORMATS.DISABLED_COMMAND
+      of peUnknownCommand: PREPROD_ERROR_FORMATS.UNKNOWN_COMMAND
+
 # TAG
 
 type
@@ -97,6 +166,7 @@ type
     properties: StringTableRef
     inclusions: PreprodInclusions
     branches: PreprodBranches
+    formatter: PreprodFormatter
     tag: ptr PreprodTag
 
 # COMMANDS
@@ -216,3 +286,6 @@ type
     # options and state
     options*: PreprodOptions
     state*: PreprodState
+
+const
+  PREPROD_BUFFER_SIZE* = 8 * SIZES_KILOBYTE

@@ -4,4 +4,4 @@ import xam
 
 reexport(preprod / exports, exports)
 
-let PREPROD_VERSION*: SemanticVersion = newSemanticVersion(1, 0, 1)
+let PREPROD_VERSION*: SemanticVersion = newSemanticVersion(1, 1, 0)

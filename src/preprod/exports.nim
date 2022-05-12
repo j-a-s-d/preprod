@@ -14,5 +14,5 @@ export
   PreprodState, PreprodTranslator, PreprodPreviewer, PreprodTag,
   PreprodResult, GOOD, BAD, OK,
   PreprodPreprocessor, newPreprodPreprocessor, run,
-  PreprodOptions, PREPROD_DEFAULT_OPTIONS, PREPROD_LINE_APPENDIX_KEY, PREPROD_COMMENT_PREFIX_KEY
-
+  PreprodOptions, PREPROD_DEFAULT_OPTIONS, PREPROD_LINE_APPENDIX_KEY, PREPROD_COMMENT_PREFIX_KEY,
+  PreprodFormatter, PreprodError, PREPROD_ERROR_FORMATS

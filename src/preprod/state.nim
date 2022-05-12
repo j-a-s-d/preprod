@@ -142,9 +142,13 @@ func isPreviewing*(state: PreprodState): bool =
 func isTranslating*(state: PreprodState): bool =
   state.phase == upTranslateContent
 
-func setupPreprodState*(defines: StringSeq = @[]): PreprodState =
+func formatError*(state: PreprodState, code: PreprodError, argument: string = STRINGS_EMPTY): string =
+  state.formatter(code, argument)
+
+func setupPreprodState*(defines: StringSeq = newStringSeq(), formatter: PreprodFormatter = DEFAULT_FORMATTER): PreprodState =
   result.phase = upInvalid
   result.executions = 0
   result.properties = newStringTable()
   result.defines = defines
+  result.formatter = formatter
   result.tag = nil

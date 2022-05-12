@@ -14,6 +14,7 @@ a custom old-school preprocessor for nim
 * deferred command execution support
 * comments support
 * custom callbacks for preview and translate passes
+* overridable error formatter
 * and more
 
 ## BUILTIN COMMANDS
@@ -77,7 +78,6 @@ a custom old-school preprocessor for nim
     let r = p.run()
     if r.ok:
       echo r.output # "x!"
-
 ```
 
 ## RELATED
@@ -90,13 +90,17 @@ You may also want to check my other nimlang projects:
 
 ## HISTORY
 
+* 12-05-22 *[1.1.0]*
+  - added overridable error formatter to allow message customization
+  - added PreprodFormatter, PreprodError and PREPROD_ERROR_FORMATS to exports
+  - updated xam dependency to 1.8.0
 * 09-02-22 *[1.0.2]*
-	- added registerFeature, hasFeature, enableFeature and isFeatureEnabled to exports
-	- added constructors overloads
+  - added registerFeature, hasFeature, enableFeature and isFeatureEnabled to exports
+  - added constructors overloads
 * 08-02-22 *[1.0.1]*
-	- added hasConditionalDefine, addConditionalDefine, removeConditionalDefine to exports
-	- updated xam dependency to 1.7.0
+  - added hasConditionalDefine, addConditionalDefine, removeConditionalDefine to exports
+  - updated xam dependency to 1.7.0
 * 28-12-21 *[1.0.0]*
-	- first public release
+  - first public release
 * 08-12-21 *[0.0.1]*
-	- started coding
+  - started coding

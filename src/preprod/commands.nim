@@ -49,19 +49,19 @@ proc executeCommand*(command: string, parameters: StringSeq, state: var PreprodS
   if not hasContent(prc.name):
     if isCommentable and command.startsWith(cp):
       return OK
-    BAD("command " & apostrophe(command) & " is unknown")
+    BAD(state.formatError(peUnknownCommand, command))
   elif not state.isFeatureEnabled(prc.feature):
-    BAD("command " & apostrophe(command) & " belongs to the feature " & apostrophe(prc.feature) & " which is not enabled")
+    BAD(state.formatError(peDisabledCommand, command))
   else:
     let params = if isCommentable: stripComments(parameters, cp) else: parameters
     if prc.arguments != uaAny:
       if prc.arguments == uaNonZero:
         if params.len == 0:
-          return BAD("no arguments supplied")
+          return BAD(state.formatError(peNoArguments))
       else:
         let amount = ord(prc.arguments)
         if params.len != amount:
-          return BAD("arguments expected: " & $amount)
+          return BAD(state.formatError(peArgumentsCount, $amount))
     if not state.isCurrentlyProcessable and prc.feature != FEATURES_BRANCHES:
       return OK
     inc(state.executions)
@@ -72,12 +72,12 @@ proc setupPreprodCommands*(): PreprodCommands =
   # STANDARD
   cmds.add(makeCommand(FEATURES_STANDARD, COMMAND_FEATURE, uaTwo, proc (state: var PreprodState, params: StringSeq): PreprodResult =
     if not state.hasFeature(params[0]):
-      return BAD("feature " & apostrophe(params[0]) & " is unknown")
+      return BAD(state.formatError(peUnknownFeature))
     if params[1] != FEATURES_ON and params[1] != FEATURES_OFF:
-      return BAD("only on/off values are valid")
+      return BAD(state.formatError(peBooleanOnly))
     let isOn = params[1] == FEATURES_ON
     if params[0] == FEATURES_STANDARD and not isOn:
-      return BAD("the STANDARD feature commands can not be disabled")
+      return BAD(state.formatError(peMandatoryStandard))
     state.enableFeature(params[0], isOn)
     OK
   ))
@@ -90,14 +90,14 @@ proc setupPreprodCommands*(): PreprodCommands =
   cmds.add(makeCommand(FEATURES_STANDARD, COMMAND_DEFER, uaNonZero, proc (state: var PreprodState, params: StringSeq): PreprodResult =
     let prc = params[0]
     if prc == COMMAND_INCLUDE or prc == COMMAND_DEFER:
-      return BAD("can not defer a " & apostrophe(prc) & " command")
+      return BAD(state.formatError(peUndeferrableCommand, prc))
     return executeCommand(prc, params[1..^1], state, cmds)
   ))
   # INCLUDES
   cmds.add(makeCommand(FEATURES_INCLUDES, COMMAND_INCLUDE, uaOne, proc (state: var PreprodState, params: StringSeq): PreprodResult =
     let fn = params[0]
     if not fileExists(fn):
-      return BAD("the included file " & apostrophe(fn) & " does not exist")
+      return BAD(state.formatError(peInexistentInclude, fn))
     var finc = open(fn, bufSize=8000)
     defer: close(finc)
     state.scheduleForInclusion(readPreprodLines(fn, finc))
@@ -108,9 +108,9 @@ proc setupPreprodCommands*(): PreprodCommands =
     case params[0]:
     of "CHAR":
       if params.len == 1:
-        return BAD("no comment prefix supplied")
+        return BAD(state.formatError(peNoPrefix))
       if params[1].len > 1:
-        return BAD("the comment prefix must be only one character long")
+        return BAD(state.formatError(pePrefixLength))
       state.setPropertyValue(PREPROD_COMMENT_PREFIX_KEY, params[1])
     else:
       echo params
@@ -148,13 +148,13 @@ proc setupPreprodCommands*(): PreprodCommands =
   ))
   cmds.add(makeCommand(FEATURES_BRANCHES, COMMAND_ELSE, uaNone, proc (state: var PreprodState, params: StringSeq): PreprodResult =
     if not state.inBranch():
-      return BAD("unexpected ELSE command")
+      return BAD(state.formatError(peUnexpectedCommand, COMMAND_ELSE))
     state.toggleBranchProcessing()
     OK
   ))
   cmds.add(makeCommand(FEATURES_BRANCHES, COMMAND_ENDIF, uaNone, proc (state: var PreprodState, params: StringSeq): PreprodResult =
     if not state.inBranch():
-      return BAD("unexpected ENDIF command")
+      return BAD(state.formatError(peUnexpectedCommand, COMMAND_ENDIF))
     state.leaveBranch()
     OK
   ))
