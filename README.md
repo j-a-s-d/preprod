@@ -66,7 +66,7 @@ a custom old-school preprocessor for nim
 ## USAGE
 
 ```nim
-    var opt = PREPROD_DEFAULT_OPTIONS
+    var opt = newPreprodOptions()
     opt.initialConditionalDefines = @["x"]
     let p = newPreprodPreprocessor(@[
       ".$ IFDEF x",
@@ -90,6 +90,9 @@ You may also want to check my other nimlang projects:
 
 ## HISTORY
 
+* 13-05-22 *[1.1.1]*
+  - added newPreprodOptions to exports
+  - general improvements
 * 12-05-22 *[1.1.0]*
   - added overridable error formatter to allow message customization
   - added PreprodFormatter, PreprodError and PREPROD_ERROR_FORMATS to exports

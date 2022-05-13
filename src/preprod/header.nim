@@ -254,6 +254,9 @@ const
     initialLineAppendix: STRINGS_EOL
   )
 
+let
+  newPreprodOptions* = func (): PreprodOptions = PREPROD_DEFAULT_OPTIONS
+
 # PREVIEWER
 
 type

@@ -12,10 +12,10 @@ use strutils,strip
 use strutils,startsWith
 
 proc processCommand(line: string, state: var PreprodState, cmds: PreprodCommands): PreprodResult =
+  result = OK
   let us = line.strip().split(STRINGS_SPACE).filter(x => x != STRINGS_EMPTY)
-  if us.len > 0 and not omitCommand(us[0], state.phase):
+  if hasContent(us) and not omitCommand(us[0], state.phase):
     return executeCommand(us[0], us[1..^1], state, cmds)
-  OK
 
 proc processLine(ppp: PreprodPreprocessor, linePrefixLen: int, customPrefixLen: int): PreprodResult =
   let s = ppp.state.line.raw
@@ -40,6 +40,8 @@ proc loopPhases(ppp: PreprodPreprocessor): PreprodResult =
   let linePrefixLen = ppp.options.linePrefix.len
   let customPrefixLen = ppp.options.customPrefix.len
   let original = ppp.state.backupProperties()
+  template makeError(location: string, code: PreprodError, argument: string = STRINGS_EMPTY): string =
+    spaced(parenthesize(location), ppp.state.formatError(code, argument))
   while ppp.state.nextPhase():
     if ppp.state.phase != upProcessDeferred:
       ppp.state.restoreProperties(original)
@@ -47,7 +49,7 @@ proc loopPhases(ppp: PreprodPreprocessor): PreprodResult =
       ppp.state.line = line
       let z = ppp.processLine(linePrefixLen, customPrefixLen)
       if not z.ok:
-        return BAD(parenthesize(line.origin) & STRINGS_SPACE & ppp.state.formatError(peUnknownError, z.output))
+        return BAD(makeError(line.origin, peUnknownError, z.output))
       let r = if ppp.state.phase == upPreviewContent:
         ppp.previewer(ppp.state, z)
       elif ppp.state.phase == upTranslateContent:
@@ -55,27 +57,28 @@ proc loopPhases(ppp: PreprodPreprocessor): PreprodResult =
       else:
         z # upProcessDeferred
       if not r.ok:
-        return BAD(parenthesize(line.origin) & STRINGS_SPACE & ppp.state.formatError(peUnknownError, z.output))
+        return BAD(makeError(line.origin, peUnknownError, r.output))
       if ppp.state.phase == upTranslateContent and ppp.state.isCurrentlyProcessable:
         if hasContent(r.output) or ppp.options.keepBlankLines:
           result.output &= r.output & ppp.state.getPropertyValue(PREPROD_LINE_APPENDIX_KEY)
     if ppp.state.inBranch():
-      return BAD(parenthesize(ppp.state.getLastBranchLocation()) & STRINGS_SPACE & ppp.state.formatError(peUnclosedBranch))
+      return BAD(makeError(ppp.state.getLastBranchLocation(), peUnclosedBranch))
     if ppp.state.phase == upPrefetchInclusions and ppp.state.hasInclusionsToMerge():
       ppp.state.mergeInclusionsIntoContent()
   result.output = cleanUp(result.output.cleanUp())
 
 proc loadContent(ppp: PreprodPreprocessor, bufferSize: int): PreprodResult =
+  result = OK
   if ppp.inline:
     ppp.state.setContent(composePreprodLines(INLINED_CONTENT, ppp.input))
   else:
     let input = ppp.input[0]
     if filesDontExist(input):
       return BAD(ppp.state.formatError(peInexistentFile, input))
-    var finput = open(input, bufSize = bufferSize)
-    defer: close(finput)
-    ppp.state.setContent(readPreprodLines(input, finput))
-  OK
+    else:
+      var finput = open(input, bufSize = bufferSize)
+      defer: close(finput)
+      ppp.state.setContent(readPreprodLines(input, finput))
 
 proc run*(ppp: PreprodPreprocessor): PreprodResult =
   result = ppp.loadContent(PREPROD_BUFFER_SIZE)
@@ -88,7 +91,7 @@ proc run*(ppp: PreprodPreprocessor): PreprodResult =
       ppp.state.addConditionalDefine(define)
     return ppp.loopPhases()
 
-proc initializePreprocessor(ppp: var PreprodPreprocessor, defines: StringSeq, options: PreprodOptions, custom: PreprodCommands, translator: PreprodTranslator, previewer: PreprodPreviewer, formatter: PreprodFormatter): PreprodPreprocessor =
+template initialize(ppp: var PreprodPreprocessor, defines: StringSeq, options: PreprodOptions, custom: PreprodCommands, translator: PreprodTranslator, previewer: PreprodPreviewer, formatter: PreprodFormatter): PreprodPreprocessor =
   ppp.custom = custom
   ppp.commands = setupPreprodCommands()
   ppp.translator = translator
@@ -101,10 +104,10 @@ proc newPreprodPreprocessor*(input: StringSeq, defines: StringSeq = newStringSeq
   var ppp = new PreprodPreprocessor
   ppp.inline = true
   ppp.input = input
-  ppp.initializePreprocessor(defines, options, custom, translator, previewer, formatter)
+  ppp.initialize(defines, options, custom, translator, previewer, formatter)
 
 proc newPreprodPreprocessor*(input: string, defines: StringSeq = newStringSeq(), options: PreprodOptions = PREPROD_DEFAULT_OPTIONS, custom: PreprodCommands = @[], translator: PreprodTranslator = DEFAULT_TRANSLATOR, previewer: PreprodPreviewer = DEFAULT_PREVIEWER, formatter: PreprodFormatter = DEFAULT_FORMATTER): PreprodPreprocessor =
   var ppp = new PreprodPreprocessor
   ppp.inline = false
   ppp.input = newStringSeq(input)
-  ppp.initializePreprocessor(defines, options, custom, translator, previewer, formatter)
+  ppp.initialize(defines, options, custom, translator, previewer, formatter)
